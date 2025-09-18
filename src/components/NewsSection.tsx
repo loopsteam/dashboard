@@ -29,8 +29,14 @@ const NewsSection: React.FC = () => {
   const fetchNews = async () => {
     try {
       setLoading(true);
+      const apiKey = process.env.REACT_APP_NEWS_API_KEY;
+      
+      if (!apiKey) {
+        throw new Error('News API Key 不可用');
+      }
+      
       const response = await axios.get(
-        `https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=3c51d67b37bd40bc80a501ce5e02a8a1&pageSize=20`
+        `https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=${apiKey}&pageSize=20`
       );
       setNews(response.data.articles);
     } catch (err) {

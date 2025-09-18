@@ -20,13 +20,20 @@ module.exports = function(app) {
   );
   
   // 汇率API代理 - 使用新的ExchangeRate API
+  const exchangeApiKey = process.env.REACT_APP_EXCHANGE_API_KEY;
+  
+  if (!exchangeApiKey) {
+    console.error('Exchange API Key 不可用');
+    return;
+  }
+  
   app.use(
     '/api/exchange',
     createProxyMiddleware({
       target: 'https://v6.exchangerate-api.com',
       changeOrigin: true,
       pathRewrite: {
-        '^/api/exchange': '/v6/a1baf415a8a97cf7d8182e3f'
+        '^/api/exchange': `/v6/${exchangeApiKey}`
       },
       onProxyReq: function (proxyReq, req, res) {
         console.log('汇率API代理请求:', req.url);

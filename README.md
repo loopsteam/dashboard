@@ -1,46 +1,70 @@
-# Getting Started with Create React App
+# Trae Dashboard
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+现代化的信息仪表板，汇聚全球新闻与股市动态。
 
-## Available Scripts
+## 环境配置
 
-In the project directory, you can run:
+在运行项目之前，请按照以下步骤配置API密钥：
 
-### `npm start`
+### 1. 复制环境变量模板
+```bash
+cp .env.example .env
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### 2. 配置API密钥
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+编辑 `.env` 文件，填入你的API密钥：
 
-### `npm test`
+```env
+# 新闻API配置
+REACT_APP_NEWS_API_KEY=your_newsapi_key_here
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+# 股票数据API配置  
+REACT_APP_TIINGO_API_TOKEN=your_tiingo_token_here
 
-### `npm run build`
+# 汇率API配置
+REACT_APP_EXCHANGE_API_KEY=your_exchange_api_key_here
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 3. 获取API密钥
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+#### NewsAPI (新闻数据)
+1. 访问 [NewsAPI](https://newsapi.org/)
+2. 注册账户并获取免费API密钥
+3. 将密钥填入 `REACT_APP_NEWS_API_KEY`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+#### Tiingo API (股票数据)
+1. 访问 [Tiingo](https://api.tiingo.com/)
+2. 注册账户并获取免费API令牌
+3. 将令牌填入 `REACT_APP_TIINGO_API_TOKEN`
 
-### `npm run eject`
+#### ExchangeRate-API (汇率数据)
+1. 访问 [ExchangeRate-API](https://www.exchangerate-api.com/)
+2. 注册账户并获取免费API密钥
+3. 将密钥填入 `REACT_APP_EXCHANGE_API_KEY`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## 运行项目
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+# 安装依赖
+npm install
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+# 启动开发服务器
+npm start
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## 功能特性
 
-## Learn More
+- 📰 实时新闻：获取最新的美国商业新闻
+- 📈 股市行情：追踪SPX和NDX指数数据
+- 💱 实时汇率：显示USD→CNY、CNY→JPY、CNY→KRW汇率
+- 🎨 现代化UI：暗色主题 + 流畅动画
+- 💾 智能缓存：减少API请求，提升性能
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 技术栈
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- React 18.2.0 + TypeScript
+- Framer Motion (动画)
+- Axios (HTTP客户端)
+- Lucide React (图标)
+- Create React App (构建工具)

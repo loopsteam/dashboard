@@ -85,6 +85,12 @@ const StocksSection: React.FC = () => {
       
       console.log('开始获取股票数据...');
       
+      const apiToken = process.env.REACT_APP_TIINGO_API_TOKEN;
+      
+      if (!apiToken) {
+        throw new Error('Tiingo API Token 不可用');
+      }
+      
       // 检查缓存
       const cachedStocks = cacheManager.get('stocks_data');
       if (cachedStocks) {
@@ -96,14 +102,14 @@ const StocksSection: React.FC = () => {
       
       // 使用代理服务器获取标普500指数 (SPX) 最新价格
       const spxResponse = await axios.get(
-        `/api/tiingo/daily/SPX/prices?token=2f05f512c1690e4af17fd1170ce175d5cd029baa`
+        `/api/tiingo/daily/SPX/prices?token=${apiToken}`
       );
       
       console.log('SPX API响应:', spxResponse.data);
       
       // 使用代理服务器获取纳指100指数 (NDX) 最新价格
       const ndxResponse = await axios.get(
-        `/api/tiingo/daily/NDX/prices?token=2f05f512c1690e4af17fd1170ce175d5cd029baa`
+        `/api/tiingo/daily/NDX/prices?token=${apiToken}`
       );
       
       console.log('NDX API响应:', ndxResponse.data);
