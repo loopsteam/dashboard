@@ -30,7 +30,7 @@ const HomeSection: React.FC = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-      {/* 实时汇率 - 显示在Trae Dashboard上方 */}
+      {/* 实时汇率 - 显示在New Stocks上方 */}
       <motion.div
         className="exchange-rate-container"
         initial={{ y: -30, opacity: 0 }}
@@ -48,7 +48,7 @@ const HomeSection: React.FC = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           <h1>
-            <span className="gradient-text">Trae Dashboard</span>
+            <span className="gradient-text">New Stocks</span>
           </h1>
           <p className="hero-subtitle">
             现代化的信息仪表板，汇聚全球新闻与股市动态

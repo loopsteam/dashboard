@@ -27,7 +27,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeSection, onSectionChange 
           whileHover={{ scale: 1.05 }}
           transition={{ type: "spring", stiffness: 400, damping: 17 }}
         >
-          <h1>Trae Dashboard</h1>
+          <h1>New Stocks</h1>
         </motion.div>
         
         <div className="nav-links">
