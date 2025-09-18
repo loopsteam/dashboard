@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, Calendar, BarChart3 } from 'lucide-react';
 import axios from 'axios';
 import { cacheManager } from '../utils/cacheManager';
+import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar } from 'recharts';
 import './StocksSection.css';
 
 interface StockData {
@@ -18,12 +19,33 @@ interface StockData {
   changePercent: number;
 }
 
+interface ChartDataPoint {
+  date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  formattedDate: string;
+}
+
+type TimeRange = 'daily' | 'weekly' | 'monthly' | '3months';
+
+const TIME_RANGE_CONFIG = {
+  daily: { label: '日线', days: 30, freq: 'daily' },
+  weekly: { label: '周线', days: 120, freq: 'weekly' },
+  monthly: { label: '月线', days: 365, freq: 'monthly' },
+  '3months': { label: '三个月', days: 90, freq: 'daily' }
+};
+
 const StocksSection: React.FC = () => {
   const [stocksData, setStocksData] = useState<StockData[]>([]);
+  const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [loading, setLoading] = useState(true);
+  const [chartLoading, setChartLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedStock, setSelectedStock] = useState<string>('SPY');
-  const [selectedTimeRange, setSelectedTimeRange] = useState<string>('1D');
+  const [selectedTimeRange, setSelectedTimeRange] = useState<TimeRange>('daily');
   const [exchangeRate, setExchangeRate] = useState<number>(0); // 汇率初始值为0，等待API获取
   const [showCurrency, setShowCurrency] = useState<'USD' | 'CNY'>('USD');
 
@@ -32,6 +54,12 @@ const StocksSection: React.FC = () => {
     fetchExchangeRate();
     fetchStocksData();
   }, []);
+
+  useEffect(() => {
+    if (selectedStock && selectedTimeRange) {
+      fetchChartData(selectedStock, selectedTimeRange);
+    }
+  }, [selectedStock, selectedTimeRange]);
 
   const fetchExchangeRate = async () => {
     try {
@@ -100,19 +128,19 @@ const StocksSection: React.FC = () => {
         return;
       }
       
-      // 使用代理服务器获取标普500指数 (SPX) 最新价格
-      const spxResponse = await axios.get(
-        `/api/tiingo/daily/SPX/prices?token=${apiToken}`
+      // 使用代理服务器获取标普500 ETF (SPY) 最新价格
+      const spyResponse = await axios.get(
+        `/api/tiingo/daily/SPY/prices?token=${apiToken}`
       );
       
-      console.log('SPX API响应:', spxResponse.data);
+      console.log('SPY API响应:', spyResponse.data);
       
-      // 使用代理服务器获取纳指100指数 (NDX) 最新价格
-      const ndxResponse = await axios.get(
-        `/api/tiingo/daily/NDX/prices?token=${apiToken}`
+      // 使用代理服务器获取纳指100 ETF (QQQ) 最新价格
+      const qqqResponse = await axios.get(
+        `/api/tiingo/daily/QQQ/prices?token=${apiToken}`
       );
       
-      console.log('NDX API响应:', ndxResponse.data);
+      console.log('QQQ API响应:', qqqResponse.data);
       
       const processStockData = (response: any, symbol: string, name: string) => {
         console.log(`处理 ${symbol} 数据:`, response.data);
@@ -160,8 +188,8 @@ const StocksSection: React.FC = () => {
       };
       
       const stocksData = [
-        processStockData(spxResponse, 'SPX', '标普500指数'),
-        processStockData(ndxResponse, 'NDX', '纳指100指数')
+        processStockData(spyResponse, 'SPY', '标普500 ETF'),
+        processStockData(qqqResponse, 'QQQ', '纳指100 ETF')
       ];
       
       console.log('成功获取所有股票数据:', stocksData);
@@ -231,6 +259,104 @@ const StocksSection: React.FC = () => {
     }
   };
 
+  const fetchChartData = async (symbol: string, timeRange: TimeRange) => {
+    try {
+      setChartLoading(true);
+      
+      const config = TIME_RANGE_CONFIG[timeRange];
+      const apiToken = process.env.REACT_APP_TIINGO_API_TOKEN;
+      
+      if (!apiToken) {
+        throw new Error('Tiingo API Token 不可用');
+      }
+      
+      // 构建缓存键
+      const cacheKey = `chart_${symbol}_${timeRange}`;
+      
+      // 检查缓存
+      const cached = cacheManager.get(cacheKey);
+      if (cached) {
+        console.log(`使用缓存的${symbol}图表数据:`, cached);
+        setChartData(cached);
+        setChartLoading(false);
+        return;
+      }
+      
+      // 计算开始日期
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(endDate.getDate() - config.days);
+      
+      const startDateStr = startDate.toISOString().split('T')[0];
+      const endDateStr = endDate.toISOString().split('T')[0];
+      
+      console.log(`获取${symbol}的${config.label}数据，时间范围: ${startDateStr} 到 ${endDateStr}`);
+      
+      // 根据时间范围选择不同的API端点
+      let apiUrl;
+      if (timeRange === 'weekly' || timeRange === 'monthly') {
+        // 使用resample端点获取周线或月线数据
+        const freq = timeRange === 'weekly' ? 'weekly' : 'monthly';
+        apiUrl = `/api/tiingo/daily/${symbol}/prices?startDate=${startDateStr}&endDate=${endDateStr}&resampleFreq=${freq}&token=${apiToken}`;
+      } else {
+        // 使用daily端点获取日线数据
+        apiUrl = `/api/tiingo/daily/${symbol}/prices?startDate=${startDateStr}&endDate=${endDateStr}&token=${apiToken}`;
+      }
+      
+      const response = await axios.get(apiUrl, { timeout: 15000 });
+      
+      console.log(`${symbol}图表API响应:`, response.data);
+      
+      if (!response.data || response.data.length === 0) {
+        throw new Error(`${symbol}图表数据为空`);
+      }
+      
+      // 处理图表数据
+      const processedData: ChartDataPoint[] = response.data.map((item: any) => {
+        const date = new Date(item.date);
+        return {
+          date: item.date,
+          open: item.open,
+          high: item.high,
+          low: item.low,
+          close: item.close,
+          volume: item.volume,
+          formattedDate: timeRange === 'monthly' 
+            ? date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short' })
+            : timeRange === 'weekly'
+            ? date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
+            : date.toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })
+        };
+      });
+      
+      console.log(`${symbol}处理后的图表数据:`, processedData);
+      
+      // 缓存图表数据（5分钟）
+      cacheManager.set(cacheKey, processedData, 5);
+      
+      setChartData(processedData);
+    } catch (err: any) {
+      console.error(`获取${symbol}图表数据失败:`, err);
+      
+      // 尝试使用过期缓存
+      const cacheKey = `chart_${symbol}_${timeRange}`;
+      const expiredCache = localStorage.getItem(`cache_${cacheKey}`);
+      if (expiredCache) {
+        try {
+          const parsed = JSON.parse(expiredCache);
+          if (parsed.data) {
+            setChartData(parsed.data);
+            console.log('使用过期缓存的图表数据');
+          }
+        } catch (parseErr) {
+          console.error('解析缓存图表数据失败:', parseErr);
+        }
+      }
+    } finally {
+      setChartLoading(false);
+    }
+  };
+
   // 格式化货币显示（支持USD/CNY切换）
   const formatCurrency = (value: number, currency: 'USD' | 'CNY' = showCurrency) => {
     // 如果汇率为0或未获取，强制显示USD
@@ -262,6 +388,95 @@ const StocksSection: React.FC = () => {
       return `${(value / 1000).toFixed(1)}K`;
     }
     return value.toLocaleString();
+  };
+
+  // K线图的自定义Tooltip组件
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="chart-tooltip">
+          <p className="tooltip-date">{data.formattedDate}</p>
+          <div className="tooltip-data">
+            <div className="tooltip-row">
+              <span className="tooltip-label">开盘:</span>
+              <span className="tooltip-value">{formatCurrency(data.open)}</span>
+            </div>
+            <div className="tooltip-row">
+              <span className="tooltip-label">收盘:</span>
+              <span className={`tooltip-value ${data.close >= data.open ? 'positive' : 'negative'}`}>
+                {formatCurrency(data.close)}
+              </span>
+            </div>
+            <div className="tooltip-row">
+              <span className="tooltip-label">最高:</span>
+              <span className="tooltip-value">{formatCurrency(data.high)}</span>
+            </div>
+            <div className="tooltip-row">
+              <span className="tooltip-label">最低:</span>
+              <span className="tooltip-value">{formatCurrency(data.low)}</span>
+            </div>
+            <div className="tooltip-row">
+              <span className="tooltip-label">成交量:</span>
+              <span className="tooltip-value">{formatVolume(data.volume)}</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // 自定义K线柱的组件
+  const CustomCandlestick = (props: any) => {
+    const { payload, x, y, width, height } = props;
+    if (!payload || !chartData.length) return null;
+
+    const { open, high, low, close } = payload;
+    const isRising = close >= open;
+    const color = isRising ? '#ef4444' : '#10b981'; // 中国习惯：涨红跌绿
+    
+    // 计算缩放因子
+    const dataHigh = Math.max(...chartData.map(d => d.high));
+    const dataLow = Math.min(...chartData.map(d => d.low));
+    const range = dataHigh - dataLow;
+    
+    if (range === 0) return null;
+    
+    // 计算坐标
+    const yScale = height / range;
+    const highY = y + height - (high - dataLow) * yScale;
+    const lowY = y + height - (low - dataLow) * yScale;
+    const openY = y + height - (open - dataLow) * yScale;
+    const closeY = y + height - (close - dataLow) * yScale;
+    
+    const bodyTop = Math.min(openY, closeY);
+    const bodyHeight = Math.abs(closeY - openY);
+    
+    return (
+      <g>
+        {/* 上下影线 */}
+        <line
+          x1={x + width / 2}
+          y1={highY}
+          x2={x + width / 2}
+          y2={lowY}
+          stroke={color}
+          strokeWidth={1}
+        />
+        {/* K线主体 */}
+        <rect
+          x={x + width * 0.2}
+          y={bodyTop}
+          width={width * 0.6}
+          height={Math.max(bodyHeight, 1)}
+          fill={isRising ? 'none' : color}
+          stroke={color}
+          strokeWidth={1}
+          opacity={1}
+        />
+      </g>
+    );
   };
 
   if (loading) {
@@ -358,13 +573,15 @@ const StocksSection: React.FC = () => {
                 </div>
               </div>
 
-              <div className="stock-price">
-                <span className="price">{formatCurrency(stock.close)}</span>
-                <div className={`change ${stock.change >= 0 ? 'positive' : 'negative'}`}>
-                  {stock.change >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
-                  <span>{formatCurrency(Math.abs(stock.change))}</span>
-                  <span>({formatPercent(stock.changePercent)})</span>
+              <div className="stock-price-container">
+                <div className="price-section">
+                  <span className="price">{formatCurrency(stock.close)}</span>
                 </div>
+              </div>
+
+              <div className="stock-date">
+                <Calendar size={16} />
+                <span>{stock.date}</span>
               </div>
 
               <div className="stock-details">
@@ -390,55 +607,85 @@ const StocksSection: React.FC = () => {
         </div>
 
         <motion.div
-          className="stock-info-container"
+          className="chart-container"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="selected-stock-header">
-            <h3>
-              {stocksData.find(s => s.symbol === selectedStock)?.name} 
-              <span className="symbol">({selectedStock})</span>
-            </h3>
-            <div className="stock-date">
-              {stocksData.find(s => s.symbol === selectedStock)?.date}
+          <div className="chart-header">
+            <div className="chart-title">
+              <h3>
+                {stocksData.find(s => s.symbol === selectedStock)?.name} 
+                <span className="symbol">({selectedStock})</span>
+              </h3>
+              <p className="chart-subtitle">K线图表分析</p>
+            </div>
+            
+            <div className="time-range-selector">
+              {(Object.keys(TIME_RANGE_CONFIG) as TimeRange[]).map(range => (
+                <button
+                  key={range}
+                  className={`time-btn ${selectedTimeRange === range ? 'active' : ''}`}
+                  onClick={() => setSelectedTimeRange(range)}
+                  disabled={chartLoading}
+                >
+                  <BarChart3 size={14} />
+                  {TIME_RANGE_CONFIG[range].label}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="detailed-stock-info">
-            {stocksData
-              .filter(s => s.symbol === selectedStock)
-              .map(stock => (
-                <div key={stock.symbol} className="detailed-info-grid">
-                  <div className="info-card">
-                    <span className="info-label">开盘价</span>
-                    <span className="info-value">{formatCurrency(stock.open)}</span>
-                  </div>
-                  <div className="info-card">
-                    <span className="info-label">最高价</span>
-                    <span className="info-value">{formatCurrency(stock.high)}</span>
-                  </div>
-                  <div className="info-card">
-                    <span className="info-label">最低价</span>
-                    <span className="info-value">{formatCurrency(stock.low)}</span>
-                  </div>
-                  <div className="info-card">
-                    <span className="info-label">收盘价</span>
-                    <span className="info-value">{formatCurrency(stock.close)}</span>
-                  </div>
-                  <div className="info-card">
-                    <span className="info-label">成交量</span>
-                    <span className="info-value">{formatVolume(stock.volume)}</span>
-                  </div>
-                  <div className="info-card">
-                    <span className="info-label">涨跌幅</span>
-                    <span className={`info-value ${stock.change >= 0 ? 'positive' : 'negative'}`}>
-                      {formatPercent(stock.changePercent)}
-                    </span>
-                  </div>
-                </div>
-              ))}
-          </div>
+          {chartLoading ? (
+            <div className="chart-loading">
+              <motion.div
+                className="loading-spinner"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              />
+              <p>加载图表数据中...</p>
+            </div>
+          ) : chartData.length > 0 ? (
+            <div className="chart-content">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart
+                  data={chartData}
+                  margin={{ top: 10, right: 20, left: 10, bottom: 10 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                  <XAxis 
+                    dataKey="formattedDate" 
+                    tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                    axisLine={{ stroke: '#4B5563' }}
+                    tickLine={{ stroke: '#4B5563' }}
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                    axisLine={{ stroke: '#4B5563' }}
+                    tickLine={{ stroke: '#4B5563' }}
+                    domain={['dataMin - 2', 'dataMax + 2']}
+                    tickFormatter={(value) => formatCurrency(value).replace(/[^\d.,]/g, '')}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar 
+                    dataKey={(entry) => [entry.low, entry.open, entry.close, entry.high]}
+                    shape={<CustomCandlestick />}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="chart-placeholder">
+              <BarChart3 size={48} className="placeholder-icon" />
+              <p>暂无图表数据</p>
+              <button 
+                onClick={() => fetchChartData(selectedStock, selectedTimeRange)}
+                className="retry-chart-btn"
+              >
+                重新加载
+              </button>
+            </div>
+          )}
         </motion.div>
       </div>
     </motion.div>

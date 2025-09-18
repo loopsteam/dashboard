@@ -158,12 +158,13 @@
   grid-template-columns: 1fr 2fr;
   gap: 2rem;
   padding: 0 2rem;
+  align-items: stretch; /* 让左右两侧高度一致 */
 }
 
 .stocks-overview {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .stock-card {
@@ -212,16 +213,23 @@
   opacity: 0.8;
 }
 
-.stock-price {
+.stock-price-container {
   margin-bottom: 1rem;
 }
 
-.stock-price .price {
+.price-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stock-price .price,
+.price-section .price {
   color: #ffffff;
   font-size: 1.8rem;
   font-weight: 700;
-  display: block;
-  margin-bottom: 0.5rem;
+  flex: 1;
 }
 
 .change {
@@ -230,14 +238,33 @@
   gap: 0.5rem;
   font-size: 0.9rem;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
 .change.positive {
-  color: #10b981;
+  color: #ef4444; /* 中国习惯：涨为红色 */
 }
 
 .change.negative {
-  color: #ef4444;
+  color: #10b981; /* 中国习惯：跌为绿色 */
+}
+
+.change-text {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.stock-date {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #b0b0b0;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .stock-details {
@@ -262,6 +289,17 @@
 .detail-row .value {
   color: #ffffff;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.detail-row .value.positive {
+  color: #ef4444; /* 中国习惯：涨为红色 */
+}
+
+.detail-row .value.negative {
+  color: #10b981; /* 中国习惯：跌为绿色 */
 }
 
 .stock-info-container {
@@ -270,6 +308,214 @@
   border-radius: 16px;
   padding: 1.5rem;
   backdrop-filter: blur(20px);
+}
+
+/* K线图容器样式 */
+.chart-container {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  backdrop-filter: blur(20px);
+  height: 100%; /* 填充整个高度 */
+  overflow: hidden;
+  transition: all 0.4s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.02), rgba(0, 153, 204, 0.02));
+  border-radius: 16px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.chart-container:hover {
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.chart-container:hover::before {
+  opacity: 1;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.chart-title h3 {
+  color: #ffffff;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+}
+
+.chart-title .symbol {
+  color: #b0b0b0;
+  font-weight: 400;
+}
+
+.chart-subtitle {
+  color: #b0b0b0;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.time-range-selector {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.time-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #b0b0b0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.time-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border-color: rgba(0, 212, 255, 0.3);
+}
+
+.time-btn.active {
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  color: #ffffff;
+  border-color: #00d4ff;
+}
+
+.time-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.chart-content {
+  margin-top: 0.5rem;
+  flex: 1; /* 自动填充剩余空间 */
+  overflow: hidden;
+  min-height: 300px; /* 最小高度保证 */
+}
+
+.chart-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1; /* 填充剩余空间 */
+  padding: 3rem;
+  color: #b0b0b0;
+  min-height: 300px;
+}
+
+.chart-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1; /* 填充剩余空间 */
+  padding: 3rem;
+  color: #b0b0b0;
+  text-align: center;
+  min-height: 300px;
+}
+
+.placeholder-icon {
+  color: #4B5563;
+  margin-bottom: 1rem;
+}
+
+.retry-chart-btn {
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+}
+
+.retry-chart-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+}
+
+/* 图表工具提示样式 */
+.chart-tooltip {
+  background: rgba(30, 30, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 1rem;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  min-width: 200px;
+}
+
+.tooltip-date {
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.tooltip-data {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.tooltip-label {
+  color: #b0b0b0;
+  font-weight: 500;
+}
+
+.tooltip-value {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.tooltip-value.positive {
+  color: #ef4444; /* 中国习惯：涨为红色 */
+}
+
+.tooltip-value.negative {
+  color: #10b981; /* 中国习惯：跌为绿色 */
 }
 
 .selected-stock-header {
@@ -348,6 +594,7 @@
   }
   
   .stocks-container {
+    grid-template-columns: 1fr;
     padding: 0 1rem;
   }
   
@@ -356,10 +603,51 @@
   }
   
   .stocks-overview {
-    flex-direction: column;
+    order: 2;
   }
   
-  .stock-card {
-    min-width: unset;
+  .chart-container {
+    order: 1;
+    height: auto;
+    min-height: 400px;
+    padding: 1rem;
+  }
+  
+  .chart-container:hover {
+    transform: none;
+  }
+  
+  .chart-header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .time-range-selector {
+    justify-content: center;
+  }
+  
+  .time-btn {
+    flex: 1;
+    min-width: 0;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  
+  .chart-content {
+    overflow-x: auto;
+    flex: 1;
+    min-height: 280px;
+  }
+  
+  .price-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .price-section .price {
+    font-size: 1.5rem;
   }
 }
