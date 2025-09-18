@@ -1,0 +1,365 @@
+.stocks-section {
+  padding: 2rem 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.title-section {
+  text-align: left;
+}
+
+.currency-toggle {
+  display: flex;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.currency-btn {
+  background: none;
+  border: none;
+  color: #b0b0b0;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.currency-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.currency-btn.active {
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  color: #ffffff;
+}
+
+.currency-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.05);
+  color: #666;
+}
+
+.currency-btn.disabled:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #666;
+  transform: none;
+}
+
+.section-header h2 {
+  color: #ffffff;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #ffffff, #b0b0b0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.section-header p {
+  color: #b0b0b0;
+  font-size: 1.1rem;
+}
+
+.loading-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: #b0b0b0;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top: 3px solid #00d4ff;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+}
+
+.retry-button {
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+}
+
+.retry-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+}
+
+.retry-button.disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: #888;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.retry-button.disabled:hover {
+  transform: none;
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* 429错误特殊样式 */
+.error-container.rate-limit-error {
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  background: rgba(255, 193, 7, 0.05);
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.rate-limit-info {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  border-radius: 8px;
+}
+
+.rate-limit-tip {
+  color: #ffc107;
+  font-size: 0.9rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stocks-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  padding: 0 2rem;
+}
+
+.stocks-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.stock-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(20px);
+}
+
+.stock-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.stock-card.active {
+  border-color: #00d4ff;
+  background: rgba(0, 212, 255, 0.1);
+}
+
+.stock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.stock-info h3 {
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.stock-info p {
+  color: #b0b0b0;
+  font-size: 0.9rem;
+  margin: 0.25rem 0 0 0;
+}
+
+.stock-icon {
+  color: #00d4ff;
+  opacity: 0.8;
+}
+
+.stock-price {
+  margin-bottom: 1rem;
+}
+
+.stock-price .price {
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.change {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.change.positive {
+  color: #10b981;
+}
+
+.change.negative {
+  color: #ef4444;
+}
+
+.stock-details {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.detail-row .label {
+  color: #b0b0b0;
+  font-weight: 500;
+}
+
+.detail-row .value {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.stock-info-container {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  backdrop-filter: blur(20px);
+}
+
+.selected-stock-header {
+  margin-bottom: 1.5rem;
+}
+
+.selected-stock-header h3 {
+  color: #ffffff;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.selected-stock-header .symbol {
+  color: #b0b0b0;
+  font-weight: 400;
+}
+
+.stock-date {
+  color: #b0b0b0;
+  font-size: 0.9rem;
+}
+
+.detailed-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.info-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(0, 212, 255, 0.3);
+}
+
+.info-label {
+  color: #b0b0b0;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.info-value {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.info-value.positive {
+  color: #10b981;
+}
+
+.info-value.negative {
+  color: #ef4444;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .title-section {
+    text-align: center;
+  }
+  
+  .stocks-container {
+    padding: 0 1rem;
+  }
+  
+  .section-header h2 {
+    font-size: 2rem;
+  }
+  
+  .stocks-overview {
+    flex-direction: column;
+  }
+  
+  .stock-card {
+    min-width: unset;
+  }
+}
