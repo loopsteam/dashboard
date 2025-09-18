@@ -24,14 +24,15 @@
 ---
 
 ## 🔥 项目介绍
-
+![首页](https://github.com/loopsteam/dashboard/blob/main/images/front.png)
 **New Stocks** 是将实时市场数据、新闻资讯和货币汇率聚合。采用现代Web技术构建，专为金融爱好者设计。
 
 ### ⚡ 核心功能
 
 - 📰 **实时新闻推送**
+![新闻](https://github.com/loopsteam/dashboard/blob/main/images/news.png)
 - 📈 **实时市场数据**
-- 💱 **货币汇率**
+![股市](https://github.com/loopsteam/dashboard/blob/main/images/Stocks.png)
 
 ## 🚀 快速开始
 
