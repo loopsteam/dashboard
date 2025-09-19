@@ -1,0 +1,17 @@
+[build]
+  publish = "build"
+  functions = "netlify/functions"
+  command = "npm run build:safe"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[functions]
+  node_bundler = "esbuild"
+
+# 环境变量配置说明
+# 生产环境不使用REACT_APP_*前缀的环境变量
+# 所有API密钥通过Netlify Functions处理，配置在服务端环境变量中
+# 例如：NEWS_API_KEY, TIINGO_API_TOKEN, EXCHANGE_API_KEY, DOUBAO_API_KEY

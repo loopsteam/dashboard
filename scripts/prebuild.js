@@ -12,15 +12,18 @@ console.log('🔒 执行构建前安全检查...');
 // 检查是否是生产构建
 const isProduction = process.env.NODE_ENV === 'production';
 const isNetlify = process.env.NETLIFY === 'true';
+const isCI = process.env.CI === 'true';
 
 console.log('环境信息:', {
   NODE_ENV: process.env.NODE_ENV,
   NETLIFY: process.env.NETLIFY,
+  CI: process.env.CI,
   isProduction,
-  isNetlify
+  isNetlify,
+  isCI
 });
 
-if (isProduction || isNetlify) {
+if (isProduction || isNetlify || isCI) {
   console.log('🚫 检测到生产环境构建，清理本地开发密钥...');
   
   // 创建临时的安全.env文件用于生产构建
@@ -52,6 +55,30 @@ REACT_APP_APP_NAME=News Stocks
   } else {
     console.log('⚠️  未找到.env文件，创建安全配置...');
     fs.writeFileSync(envPath, safeEnvContent);
+  }
+  
+  // 在CI环境中，确保没有任何REACT_APP_密钥环境变量
+  if (isNetlify || isCI) {
+    const dangerousEnvVars = [
+      'REACT_APP_NEWS_API_KEY',
+      'REACT_APP_TIINGO_API_TOKEN', 
+      'REACT_APP_EXCHANGE_API_KEY',
+      'REACT_APP_DOUBAO_API_KEY'
+    ];
+    
+    const foundDangerousVars = dangerousEnvVars.filter(varName => process.env[varName]);
+    
+    if (foundDangerousVars.length > 0) {
+      console.error('❌ 检测到危险的环境变量:');
+      foundDangerousVars.forEach(varName => {
+        console.error(`   - ${varName}`);
+      });
+      console.error('请在Netlify环境变量设置中删除这些REACT_APP_*前缀的密钥!');
+      console.error('应该使用不带前缀的版本: NEWS_API_KEY, TIINGO_API_TOKEN, EXCHANGE_API_KEY, DOUBAO_API_KEY');
+      process.exit(1);
+    } else {
+      console.log('✅ 未检测到危险的REACT_APP_*环境变量');
+    }
   }
 } else {
   console.log('🛠️  本地开发环境，保持现有配置');
