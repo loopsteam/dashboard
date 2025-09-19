@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, Activity, Calendar, BarChart3 } from 'lucide-react';
 import axios from 'axios';
 import { cacheManager } from '../utils/cacheManager';
+import { API_ENDPOINTS } from '../utils/apiConfig';
 import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar } from 'recharts';
 import './StocksSection.css';
 
@@ -71,7 +72,7 @@ const StocksSection: React.FC = () => {
       }
 
       const response = await axios.get(
-        '/api/exchange/latest/CNY',
+        API_ENDPOINTS.exchange + '/latest/CNY',
         {
           timeout: 15000, // 设置15秒超时
           headers: {
@@ -113,12 +114,6 @@ const StocksSection: React.FC = () => {
       
       console.log('开始获取股票数据...');
       
-      const apiToken = process.env.REACT_APP_TIINGO_API_TOKEN;
-      
-      if (!apiToken) {
-        throw new Error('Tiingo API Token 不可用');
-      }
-      
       // 检查缓存
       const cachedStocks = cacheManager.get('stocks_data');
       if (cachedStocks) {
@@ -128,16 +123,16 @@ const StocksSection: React.FC = () => {
         return;
       }
       
-      // 使用代理服务器获取标普500 ETF (SPY) 最新价格
+      // 使用API配置获取标普500 ETF (SPY) 最新价格
       const spyResponse = await axios.get(
-        `/api/tiingo/daily/SPY/prices?token=${apiToken}`
+        API_ENDPOINTS.stocks + '/daily/SPY/prices'
       );
       
       console.log('SPY API响应:', spyResponse.data);
       
-      // 使用代理服务器获取纳指100 ETF (QQQ) 最新价格
+      // 使用API配置获取纳指100 ETF (QQQ) 最新价格
       const qqqResponse = await axios.get(
-        `/api/tiingo/daily/QQQ/prices?token=${apiToken}`
+        API_ENDPOINTS.stocks + '/daily/QQQ/prices'
       );
       
       console.log('QQQ API响应:', qqqResponse.data);
@@ -264,11 +259,6 @@ const StocksSection: React.FC = () => {
       setChartLoading(true);
       
       const config = TIME_RANGE_CONFIG[timeRange];
-      const apiToken = process.env.REACT_APP_TIINGO_API_TOKEN;
-      
-      if (!apiToken) {
-        throw new Error('Tiingo API Token 不可用');
-      }
       
       // 构建缓存键
       const cacheKey = `chart_${symbol}_${timeRange}`;
@@ -297,10 +287,10 @@ const StocksSection: React.FC = () => {
       if (timeRange === 'weekly' || timeRange === 'monthly') {
         // 使用resample端点获取周线或月线数据
         const freq = timeRange === 'weekly' ? 'weekly' : 'monthly';
-        apiUrl = `/api/tiingo/daily/${symbol}/prices?startDate=${startDateStr}&endDate=${endDateStr}&resampleFreq=${freq}&token=${apiToken}`;
+        apiUrl = `${API_ENDPOINTS.stocks}/daily/${symbol}/prices?startDate=${startDateStr}&endDate=${endDateStr}&resampleFreq=${freq}`;
       } else {
         // 使用daily端点获取日线数据
-        apiUrl = `/api/tiingo/daily/${symbol}/prices?startDate=${startDateStr}&endDate=${endDateStr}&token=${apiToken}`;
+        apiUrl = `${API_ENDPOINTS.stocks}/daily/${symbol}/prices?startDate=${startDateStr}&endDate=${endDateStr}`;
       }
       
       const response = await axios.get(apiUrl, { timeout: 15000 });

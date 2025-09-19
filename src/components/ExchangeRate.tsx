@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { DollarSign, RefreshCw, TrendingUp, CircleDollarSign, Banknote } from 'lucide-react';
 import axios from 'axios';
 import { cacheManager } from '../utils/cacheManager';
+import { API_ENDPOINTS } from '../utils/apiConfig';
 import './ExchangeRate.css';
 
 interface ExchangeRateData {
@@ -48,8 +49,8 @@ const ExchangeRate: React.FC = () => {
       const startTime = Date.now();
       
       try {
-        // 使用新的ExchangeRate API获取以CNY为基础的所有汇率
-        const response = await axios.get('/api/exchange/latest/CNY', {
+        // 使用API配置获取以CNY为基础的所有汇率
+        const response = await axios.get(API_ENDPOINTS.exchange + '/latest/CNY', {
           timeout: 15000
         });
         

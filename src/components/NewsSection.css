@@ -112,6 +112,26 @@
   color: #b0b0b0;
 }
 
+.loading-text {
+  text-align: center;
+  color: #9CA3AF;
+  margin-top: 1rem;
+}
+
+.loading-text div:first-child {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 5px;
+  color: #ffffff;
+}
+
+.loading-sub {
+  font-size: 12px;
+  opacity: 0.8;
+  font-style: italic;
+  color: #b0b0b0;
+}
+
 .loading-spinner {
   width: 40px;
   height: 40px;

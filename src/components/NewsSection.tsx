@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, ExternalLink, Languages, RotateCcw } from 'lucide-react';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../utils/apiConfig';
 import './NewsSection.css';
 
 interface NewsItem {
@@ -35,18 +36,33 @@ const NewsSection: React.FC = () => {
   const fetchNews = async () => {
     try {
       setLoading(true);
-      const apiKey = process.env.REACT_APP_NEWS_API_KEY;
+      setError(null);
       
-      if (!apiKey) {
-        throw new Error('News API Key 不可用');
-      }
+      console.log('开始获取新闻数据，预计等待10-20秒...');
       
       const response = await axios.get(
-        `https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=${apiKey}&pageSize=20`
+        API_ENDPOINTS.news + '?country=us&category=business&pageSize=20',
+        {
+          timeout: 30000 // 30秒超时
+        }
       );
-      setNews(response.data.articles);
-    } catch (err) {
-      setError('无法获取新闻数据');
+      
+      if (response.data && response.data.articles) {
+        setNews(response.data.articles);
+        console.log('新闻数据获取成功:', response.data.articles.length, '条');
+      } else {
+        throw new Error('新闻数据格式错误');
+      }
+    } catch (err: any) {
+      console.error('获取新闻失败:', err);
+      
+      if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
+        setError('新闻服务响应超时，请稍后重试');
+      } else if (err.response?.status === 429) {
+        setError('请求过于频繁，请稍后重试');
+      } else {
+        setError('无法获取新闻数据，请检查网络连接');
+      }
     } finally {
       setLoading(false);
     }
@@ -54,13 +70,6 @@ const NewsSection: React.FC = () => {
 
   // 翻译单个新闻条目
   const translateNewsItem = async (index: number) => {
-    const apiKey = process.env.REACT_APP_DOUBAO_API_KEY;
-    
-    if (!apiKey) {
-      console.error('Doubao API Key 未配置');
-      return;
-    }
-
     const newsItem = news[index];
     if (!newsItem || newsItem.isTranslating || (newsItem.translatedTitle && newsItem.translatedDescription)) {
       return;
@@ -73,32 +82,13 @@ const NewsSection: React.FC = () => {
     setTranslatingCount(prev => prev + 1);
 
     try {
-      const prompt = `请将以下英文新闻内容翻译成中文，保持新闻的专业性和准确性：
-
-标题：${newsItem.title}
-
-描述：${newsItem.description || '无描述'}
-
-请以JSON格式返回，包含"title"和"description"字段：`;
-
       const response = await axios.post(
-        'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
+        API_ENDPOINTS.translate,
         {
-          model: 'doubao-seed-1-6-flash-250828',
-          messages: [
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          temperature: 0.3,
-          max_tokens: 1000
+          title: newsItem.title,
+          description: newsItem.description || '无描述'
         },
         {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
           timeout: 15000
         }
       );
@@ -199,7 +189,10 @@ const NewsSection: React.FC = () => {
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
-          <p>正在加载新闻...</p>
+          <div className="loading-text">
+            <div>正在加载新闻...</div>
+            <div className="loading-sub">预计等待10-20秒，请耐心等待</div>
+          </div>
         </div>
       </div>
     );
