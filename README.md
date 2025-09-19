@@ -163,8 +163,6 @@ netlify deploy --prod --dir=build
 [![GitHub stars](https://img.shields.io/github/stars/loopsteam/dashboard?style=social)](https://github.com/loopsteam/dashboard/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/loopsteam/dashboard?style=social)](https://github.com/loopsteam/dashboard/network)
 
-[🐛 报告Bug](https://github.com/loopsteam/dashboard/issues) • [✨ 请求功能](https://github.com/loopsteam/dashboard/issues) • [📚 查看文档](https://github.com/loopsteam/dashboard/wiki)
-
 **让金融数据触手可及** 📈
 
 </div>
