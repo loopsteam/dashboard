@@ -1,6 +1,6 @@
 // API配置工具 - 根据环境自动选择API调用方式
 export const isProduction = process.env.NODE_ENV === 'production';
-export const isNetlifyProduction = process.env.NETLIFY === 'true';
+export const isNetlifyProduction = process.env.NETLIFY === 'true' || isProduction;
 
 // API端点配置
 export const API_ENDPOINTS = {
@@ -27,19 +27,30 @@ export const API_ENDPOINTS = {
 
 // 检查是否有API密钥可用（仅本地开发环境）
 export const hasApiKeys = () => {
-  if (isNetlifyProduction) return true; // 生产环境假设配置正确
+  if (isNetlifyProduction) {
+    // 生产环境不需要检查前端密钥，使用Netlify Functions
+    return true;
+  }
   
-  return !!(
+  // 本地开发环境检查
+  const hasKeys = !!(    
     process.env.REACT_APP_NEWS_API_KEY &&
     process.env.REACT_APP_TIINGO_API_TOKEN &&
     process.env.REACT_APP_EXCHANGE_API_KEY &&
     process.env.REACT_APP_DOUBAO_API_KEY
   );
+  
+  if (!hasKeys) {
+    console.warn('本地开发环境缺少API密钥，请检查.env文件');
+  }
+  
+  return hasKeys;
 };
 
 console.log('API配置:', {
   isProduction,
   isNetlifyProduction,
   hasApiKeys: hasApiKeys(),
-  endpoints: API_ENDPOINTS
+  endpoints: API_ENDPOINTS,
+  environment: process.env.REACT_APP_ENVIRONMENT || 'unknown'
 });
