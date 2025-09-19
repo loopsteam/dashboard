@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Activity, Calendar, BarChart3 } from 'lucide-react';
+import { Activity, Calendar, BarChart3 } from 'lucide-react';
 import axios from 'axios';
 import { cacheManager } from '../utils/cacheManager';
 import { API_ENDPOINTS } from '../utils/apiConfig';
-import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar } from 'recharts';
+import { ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Bar } from 'recharts';
 import './StocksSection.css';
 
 interface StockData {
@@ -364,11 +364,6 @@ const StocksSection: React.FC = () => {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(displayValue);
-  };
-
-  const formatPercent = (value: number) => {
-    const sign = value >= 0 ? '+' : '';
-    return `${sign}${value.toFixed(2)}%`;
   };
 
   const formatVolume = (value: number) => {

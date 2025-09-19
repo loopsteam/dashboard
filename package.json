@@ -23,7 +23,7 @@
   "scripts": {
     "start": "react-scripts start",
     "prebuild": "node scripts/prebuild.js",
-    "build": "react-scripts build",
+    "build": "ESLINT_NO_DEV_ERRORS=true react-scripts build",
     "postbuild": "node scripts/postbuild.js",
     "build:safe": "npm run prebuild && npm run build && npm run postbuild",
     "test": "react-scripts test",

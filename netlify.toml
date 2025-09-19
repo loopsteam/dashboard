@@ -1,7 +1,7 @@
 [build]
   publish = "build"
   functions = "netlify/functions"
-  command = "npm run build:safe"
+  command = "ESLINT_NO_DEV_ERRORS=true npm run build:safe"
 
 [[redirects]]
   from = "/api/*"

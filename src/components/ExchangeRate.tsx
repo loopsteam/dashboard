@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { DollarSign, RefreshCw, TrendingUp, CircleDollarSign, Banknote } from 'lucide-react';
+import { DollarSign, RefreshCw, CircleDollarSign, Banknote } from 'lucide-react';
 import axios from 'axios';
 import { cacheManager } from '../utils/cacheManager';
 import { API_ENDPOINTS } from '../utils/apiConfig';
